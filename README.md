@@ -5,6 +5,6 @@ The interface is available in two languages:
     *en
     *pt-BR
 
-To use, create the database with  provided [ScriptSQL](https://github.com/JulianoZanella/Examples/blob/master/PersonsMysql/ScriptSql.sql).
+To use, create the database with  provided [ScriptSQL](https://github.com/JulianoZanella/PersonsMysqlExample/blob/master/ScriptSql.sql).
 
 *Please quote if it is to be used
