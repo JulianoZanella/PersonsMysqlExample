@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> e681a8ec141b24c9396b4ffe46f1f660ff56158e
 # Created by https://www.gitignore.io/api/java,kotlin,intellij+all
 
 ### Intellij+all ###
@@ -106,4 +110,7 @@ hs_err_pid*
 
 
 # End of https://www.gitignore.io/api/java,kotlin,intellij+all
+<<<<<<< HEAD
 /.idea
+=======
+>>>>>>> e681a8ec141b24c9396b4ffe46f1f660ff56158e
