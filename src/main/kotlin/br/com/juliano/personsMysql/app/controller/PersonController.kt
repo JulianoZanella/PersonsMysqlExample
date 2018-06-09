@@ -55,7 +55,6 @@ class PersonController : Controller() {
         val name: String = selectedPerson.name.value ?: ""
         val date: LocalDate = selectedPerson.birthDate.value ?: LocalDate.now()
         val sex: Char = selectedPerson.sex.value ?: 'M'
-        println("Is dirty: ${selectedPerson.isDirty}")
         return Person(id, name, date, sex)
     }
 

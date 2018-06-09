@@ -8,9 +8,17 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.time.LocalDate
 import java.util.ArrayList
+import kotlin.reflect.KClass
+
 
 /**
+ * Add functions to Connection Class.
+ *
  * @author Juliano Zanella
+ */
+
+/**
+ *
  *
  * @param tableName The name of Table
  * @param
@@ -28,12 +36,13 @@ fun Connection.insert(tableName: String, fields: List<String>, values: List<Any>
     sql += ") $valuesString)"
     this.prepareStatement(sql).use({ stmt ->
         for ((i, value) in values.withIndex()) {
+            val index = i + 1
             when (value) {
-                is Int -> stmt.setInt(i + 1, value)
-                is String -> stmt.setString(i + 1, value)
-                is Date -> stmt.setDate(i + 1, value)
-                is LocalDate -> stmt.setDate(i + 1, value.toSQLDate())
-                is Char -> stmt.setString(i + 1, "$value")
+                is Int -> stmt.setInt(index, value)
+                is String -> stmt.setString(index, value)
+                is Date -> stmt.setDate(index, value)
+                is LocalDate -> stmt.setDate(index, value.toSQLDate())
+                is Char -> stmt.setString(index, "$value")
                 else -> throw InvalidTypeException()
             }
         }
@@ -115,133 +124,19 @@ fun Connection.getPK(table: String): String {
     return pK
 }
 
-/**
- * in construction. see-> PersonDao.select
- */
-fun Connection.select(c: Class<*>, id: Int = 0): List<Any> {
-    val list = ArrayList<Any>()
-    try {
-        val table = c.simpleName
-        var sql = "SELECT * FROM $table"
-        if (id > 0) sql += " WHERE ${getPK(table)} = $id"
-        try {
-            this.prepareStatement(sql).use({ stmt ->
-                stmt.executeQuery().use({ resultSet ->
-                    while (resultSet.next()) {
-                        val obj = c.newInstance()
-                        for (m in c.methods) {
-                            if (m.name.substring(0, 3) == "set") {
-                                val args1 = arrayOfNulls<Class<*>>(1)
-                                val arrayOfClass = m.parameterTypes
-                                val s = m.name.substring(3, m.name.length)
-                                if (arrayOfClass[0].name == "java.lang.String") {
-                                    args1[0] = String::class.java
-                                    obj.javaClass.getMethod(m.name,
-                                            args1[0]).invoke(obj, resultSet.getString(s))
-                                }
-                                if (arrayOfClass[0].name == "java.lang.Integer") {
-                                    args1[0] = Integer::class.java
-                                    obj.javaClass.getMethod(m.name, args1[0]).invoke(obj, resultSet.getInt(s))
-                                }
-                                if (arrayOfClass[0].name == "java.lang.Double") {
-                                    args1[0] = Double::class.java
-                                    obj.javaClass.getMethod(m.name,
-                                            args1[0]).invoke(obj, resultSet.getDouble(s))
-                                }
-                                if (arrayOfClass[0].name == "java.lang.Boolean") {
-                                    args1[0] = Boolean::class.java
-                                    obj.javaClass.getMethod(m.name,
-                                            args1[0]).invoke(obj, resultSet.getBoolean(s))
-                                }
-                                if (arrayOfClass[0].name == "java.lang.Character") {
-                                    args1[0] = Character::class.java
-                                    obj.javaClass.getMethod(m.name,
-                                            args1[0]).invoke(obj, resultSet.getString(s)[0])
-                                }
-                                if (arrayOfClass[0].name.contains("LocalDate", true)) {
-                                    args1[0] = LocalDate::class.javaObjectType
-                                    val date: LocalDate = resultSet.getDate(s).toLocalDate()
-                                    obj.javaClass.getMethod(m.name,
-                                            args1[0]).invoke(obj, date)
-                                }
-                                if (arrayOfClass[0].name.equals("Date", true)) {
-                                    args1[0] = java.util.Date::class.javaObjectType
-                                    obj.javaClass.getMethod(m.name,
-                                            args1[0]).invoke(obj, resultSet.getDate(s))
-                                }
-                            }
-                        }
-
-                        list.add(obj)
-                    }
-                })
-            })
-        } catch (ex: SQLException) {
-            showMessage(ex.message!!)
-        } catch (ex: InstantiationException) {
-            showMessage(ex.message!!)
-        } catch (ex: IllegalAccessException) {
-            showMessage(ex.message!!)
-        } catch (ex: NoSuchMethodException) {
-            showMessage(ex.message!!)
-        } catch (ex: SecurityException) {
-            showMessage(ex.message!!)
-        } catch (ex: IllegalArgumentException) {
-            showMessage(ex.message!!)
-        } catch (ex: InvocationTargetException) {
-            showMessage(ex.message!!)
-        }
-    } catch (ex: IllegalArgumentException) {
-        showMessage(ex.message!!)
-    }
-    return list
+@Throws(SQLException::class, InstantiationException::class, IllegalAccessException::class, NoSuchMethodException::class,
+        SecurityException::class, IllegalArgumentException::class, InvocationTargetException::class, IllegalArgumentException::class)
+fun Connection.select(tableName: String, id: Int? = 0): ResultSet? {
+    var resultSetRet: ResultSet? = null
+    var sql = "SELECT * FROM $tableName"
+    if (id != null && id > 0) sql += " WHERE ${getPK(tableName)} = $id"
+    this.prepareStatement(sql).use({ stmt ->
+        stmt.executeQuery().use({ resultSet ->
+            resultSetRet = resultSet
+        })
+    })
+    return resultSetRet
 }
 
-private fun fillObject(c: Class<*>, resultSet: ResultSet): Any {
-    val obj = c.newInstance()
-    for (m in c.methods) {
-        if (m.name.substring(0, 3) == "set") {
-            val args1 = arrayOfNulls<Class<*>>(1)
-            val arrayOfClass = m.parameterTypes
-            val s = m.name.substring(3, m.name.length)
-            if (arrayOfClass[0].name == "java.lang.String") {
-                args1[0] = String::class.java
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, resultSet.getString(s))
-            }
-            if (arrayOfClass[0].name == "java.lang.Integer") {
-                args1[0] = Int::class.java
-                obj.javaClass.getMethod(m.name, args1[0]).invoke(obj, resultSet.getInt(s))
-            }
-            if (arrayOfClass[0].name == "double") {
-                args1[0] = Double::class.javaPrimitiveType
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, resultSet.getDouble(s))
-            }
-            if (arrayOfClass[0].name == "boolean") {
-                args1[0] = Boolean::class.javaPrimitiveType
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, resultSet.getBoolean(s))
-            }
-            if (arrayOfClass[0].name.equals("char", true)) {
-                args1[0] = Char::class.javaPrimitiveType
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, resultSet.getString(s)[0])
-            }
-            if (arrayOfClass[0].name.contains("LocalDate", true)) {
-                args1[0] = LocalDate::class.javaObjectType
-                val date: LocalDate = resultSet.getDate(s).toLocalDate()
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, date)
-            }
-            if (arrayOfClass[0].name.equals("Date", true)) {
-                args1[0] = java.util.Date::class.javaObjectType
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, resultSet.getDate(s))
-            }
-        }
-    }
-    return obj
-}
 
 

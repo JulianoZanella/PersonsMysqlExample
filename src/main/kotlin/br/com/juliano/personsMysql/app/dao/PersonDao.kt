@@ -45,16 +45,46 @@ class PersonDao {
         }
     }
 
-   fun select(id: Int = 0): List<Person> {
+    /**
+     * @param id use if you want select person by id.
+     */
+    fun select(id: Int? = null): List<Person> {
         val list = mutableListOf<Person>()
-        val listObject = connection.select(Person::class.java, id)
-        for (o in listObject) {
-            list.add(o as Person)
+        try {
+            val resultSet = connection.select(TABLE, id)
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    val person = Person()
+                    person.id = resultSet.getInt(PK_FIELD)
+                    person.name = resultSet.getString(FIELDS[0])
+                    person.birthDate = resultSet.getDate(FIELDS[1]).toLocalDate()
+                    person.sex = resultSet.getString(FIELDS[2]).toCharArray()[0]
+                    list.add(person)
+                }
+            }
+        } catch (ex: SQLException) {
+            showMessage(ex.message!!)
+        } catch (ex: InstantiationException) {
+            showMessage(ex.message!!)
+        } catch (ex: IllegalAccessException) {
+            showMessage(ex.message!!)
+        } catch (ex: NoSuchMethodException) {
+            showMessage(ex.message!!)
+        } catch (ex: SecurityException) {
+            showMessage(ex.message!!)
+        } catch (ex: IllegalArgumentException) {
+            showMessage(ex.message!!)
+        } catch (ex: InvocationTargetException) {
+            showMessage(ex.message!!)
+        } catch (ex: IllegalArgumentException) {
+            showMessage(ex.message!!)
         }
         return list
     }
 
+
     companion object {
+        private const val PK_FIELD = "id"
         private val FIELDS = listOf("name", "birthDate", "sex")
         private val TABLE = Person::class.simpleName!!.toLowerCase()
     }
