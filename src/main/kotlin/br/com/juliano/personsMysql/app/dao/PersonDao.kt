@@ -52,16 +52,15 @@ class PersonDao {
         val list = mutableListOf<Person>()
         try {
             val resultSet = connection.select(TABLE, id)
-            if (resultSet != null) {
-                while (resultSet.next()) {
-                    val person = Person()
-                    person.id = resultSet.getInt(PK_FIELD)
-                    person.name = resultSet.getString(FIELDS[0])
-                    person.birthDate = resultSet.getDate(FIELDS[1]).toLocalDate()
-                    person.sex = resultSet.getString(FIELDS[2]).toCharArray()[0]
-                    list.add(person)
-                }
+            while (resultSet.next()) {
+                val person = Person()
+                person.id = resultSet.getInt(PK_FIELD)
+                person.name = resultSet.getString(FIELDS[0])
+                person.birthDate = resultSet.getDate(FIELDS[1]).toLocalDate()
+                person.sex = resultSet.getString(FIELDS[2]).toCharArray()[0]
+                list.add(person)
             }
+            resultSet.close()
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
         } catch (ex: InstantiationException) {
@@ -78,6 +77,8 @@ class PersonDao {
             showMessage(ex.message!!)
         } catch (ex: IllegalArgumentException) {
             showMessage(ex.message!!)
+        } finally {
+
         }
         return list
     }

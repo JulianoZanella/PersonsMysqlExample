@@ -126,16 +126,11 @@ fun Connection.getPK(table: String): String {
 
 @Throws(SQLException::class, InstantiationException::class, IllegalAccessException::class, NoSuchMethodException::class,
         SecurityException::class, IllegalArgumentException::class, InvocationTargetException::class, IllegalArgumentException::class)
-fun Connection.select(tableName: String, id: Int? = 0): ResultSet? {
-    var resultSetRet: ResultSet? = null
+fun Connection.select(tableName: String, id: Int? = 0): ResultSet {
     var sql = "SELECT * FROM $tableName"
     if (id != null && id > 0) sql += " WHERE ${getPK(tableName)} = $id"
-    this.prepareStatement(sql).use({ stmt ->
-        stmt.executeQuery().use({ resultSet ->
-            resultSetRet = resultSet
-        })
-    })
-    return resultSetRet
+    val stmt = prepareStatement(sql)
+    return stmt.executeQuery()
 }
 
 
