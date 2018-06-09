@@ -45,51 +45,11 @@ class PersonDao {
         }
     }
 
-   /* fun select(id: Int = 0): List<Person> {
+   fun select(id: Int = 0): List<Person> {
         val list = mutableListOf<Person>()
         val listObject = connection.select(Person::class.java, id)
         for (o in listObject) {
             list.add(o as Person)
-        }
-        return list
-    }*/
-
-    fun select(id: Int = 0): List<Person> {
-        val list = ArrayList<Person>()
-        val pk = connection.getPK(TABLE)
-        try {
-            var sql = "SELECT * FROM $TABLE"
-            if (id > 0) sql += " WHERE $pk = $id"
-            try {
-                connection.prepareStatement(sql).use({ stmt ->
-                    stmt.executeQuery().use({ resultSet ->
-                        while (resultSet.next()) {
-                            val person = Person()
-                            person.id = resultSet.getInt(pk)
-                            person.name = resultSet.getString(FIELDS[0])
-                            person.birthDate = resultSet.getDate(FIELDS[1]).toLocalDate()
-                            person.sex = resultSet.getString(FIELDS[2]).toCharArray()[0]
-                            list.add(person)
-                        }
-                    })
-                })
-            } catch (ex: SQLException) {
-                showMessage(ex.message!!)
-            } catch (ex: InstantiationException) {
-                showMessage(ex.message!!)
-            } catch (ex: IllegalAccessException) {
-                showMessage(ex.message!!)
-            } catch (ex: NoSuchMethodException) {
-                showMessage(ex.message!!)
-            } catch (ex: SecurityException) {
-                showMessage(ex.message!!)
-            } catch (ex: IllegalArgumentException) {
-                showMessage(ex.message!!)
-            } catch (ex: InvocationTargetException) {
-                showMessage(ex.message!!)
-            }
-        } catch (ex: IllegalArgumentException) {
-            showMessage(ex.message!!)
         }
         return list
     }

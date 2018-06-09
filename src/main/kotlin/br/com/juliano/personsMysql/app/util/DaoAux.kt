@@ -128,7 +128,50 @@ fun Connection.select(c: Class<*>, id: Int = 0): List<Any> {
             this.prepareStatement(sql).use({ stmt ->
                 stmt.executeQuery().use({ resultSet ->
                     while (resultSet.next()) {
-                        val obj = fillObject(c, resultSet)
+                        val obj = c.newInstance()
+                        for (m in c.methods) {
+                            if (m.name.substring(0, 3) == "set") {
+                                val args1 = arrayOfNulls<Class<*>>(1)
+                                val arrayOfClass = m.parameterTypes
+                                val s = m.name.substring(3, m.name.length)
+                                if (arrayOfClass[0].name == "java.lang.String") {
+                                    args1[0] = String::class.java
+                                    obj.javaClass.getMethod(m.name,
+                                            args1[0]).invoke(obj, resultSet.getString(s))
+                                }
+                                if (arrayOfClass[0].name == "java.lang.Integer") {
+                                    args1[0] = Integer::class.java
+                                    obj.javaClass.getMethod(m.name, args1[0]).invoke(obj, resultSet.getInt(s))
+                                }
+                                if (arrayOfClass[0].name == "java.lang.Double") {
+                                    args1[0] = Double::class.java
+                                    obj.javaClass.getMethod(m.name,
+                                            args1[0]).invoke(obj, resultSet.getDouble(s))
+                                }
+                                if (arrayOfClass[0].name == "java.lang.Boolean") {
+                                    args1[0] = Boolean::class.java
+                                    obj.javaClass.getMethod(m.name,
+                                            args1[0]).invoke(obj, resultSet.getBoolean(s))
+                                }
+                                if (arrayOfClass[0].name == "java.lang.Character") {
+                                    args1[0] = Character::class.java
+                                    obj.javaClass.getMethod(m.name,
+                                            args1[0]).invoke(obj, resultSet.getString(s)[0])
+                                }
+                                if (arrayOfClass[0].name.contains("LocalDate", true)) {
+                                    args1[0] = LocalDate::class.javaObjectType
+                                    val date: LocalDate = resultSet.getDate(s).toLocalDate()
+                                    obj.javaClass.getMethod(m.name,
+                                            args1[0]).invoke(obj, date)
+                                }
+                                if (arrayOfClass[0].name.equals("Date", true)) {
+                                    args1[0] = java.util.Date::class.javaObjectType
+                                    obj.javaClass.getMethod(m.name,
+                                            args1[0]).invoke(obj, resultSet.getDate(s))
+                                }
+                            }
+                        }
+
                         list.add(obj)
                     }
                 })
@@ -166,10 +209,9 @@ private fun fillObject(c: Class<*>, resultSet: ResultSet): Any {
                 obj.javaClass.getMethod(m.name,
                         args1[0]).invoke(obj, resultSet.getString(s))
             }
-            if (arrayOfClass[0].name.contains("int", true)) {
-                args1[0] = Int::class.javaPrimitiveType
-                obj.javaClass.getMethod(m.name,
-                        args1[0]).invoke(obj, resultSet.getInt(s))
+            if (arrayOfClass[0].name == "java.lang.Integer") {
+                args1[0] = Int::class.java
+                obj.javaClass.getMethod(m.name, args1[0]).invoke(obj, resultSet.getInt(s))
             }
             if (arrayOfClass[0].name == "double") {
                 args1[0] = Double::class.javaPrimitiveType
