@@ -23,13 +23,14 @@ repositories {
     maven {
         url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     compile 'no.tornado:tornadofx:1.7.14'
     testCompile 'junit:junit:4.12'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.6'
+    implementation "com.github.JulianoZanella:util:v1.0.3"
 }
 
 mainClassName = 'br.com.juliano.personsMysql.app.MyApp'

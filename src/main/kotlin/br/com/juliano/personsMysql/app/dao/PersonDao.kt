@@ -3,20 +3,22 @@ package br.com.juliano.personsMysql.app.dao
 import br.com.juliano.personsMysql.app.model.Person
 import br.com.juliano.personsMysql.app.util.*
 import br.com.juliano.personsMysql.app.util.exceptiom.InvalidTypeException
+import br.com.julianozanella.util.Database
 import java.lang.reflect.InvocationTargetException
-import java.sql.Connection
+import java.sql.ResultSet
 import java.sql.SQLException
-import java.util.ArrayList
 
 
 class PersonDao {
 
-    private val connection: Connection = Connector().connection()
+    init {
+        Database.createConnection(URL, USER, PASS)
+    }
 
     fun insert(person: Person) {
         try {
-            connection.insert(TABLE, FIELDS,
-                    listOf(person.name, person.birthDate, person.sex))
+            Database.insert(TABLE,
+                    hashMapOf(Pair(FIELDS[0], person.name), Pair(FIELDS[1], person.birthDate), Pair(FIELDS[2], person.sex)))
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
         } catch (ex: InvalidTypeException) {
@@ -26,8 +28,10 @@ class PersonDao {
 
     fun update(person: Person) {
         try {
-            connection.update(TABLE, FIELDS,
-                    listOf(person.name, person.birthDate, person.sex), person.id)
+            Database.update(TABLE,
+                    hashMapOf(Pair(FIELDS[0], person.name),
+                            Pair(FIELDS[1], person.birthDate), Pair(FIELDS[2], person.sex)),
+                    person.id)
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
         } catch (ex: InvalidTypeException) {
@@ -37,7 +41,7 @@ class PersonDao {
 
     fun delete(person: Person) {
         try {
-            connection.delete(TABLE, person.id)
+            Database.delete(TABLE, person.id)
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
         } catch (ex: InvalidTypeException) {
@@ -51,7 +55,11 @@ class PersonDao {
     fun select(id: Int? = null): List<Person> {
         val list = mutableListOf<Person>()
         try {
-            val resultSet = connection.select(TABLE, id)
+            val resultSet: ResultSet = if (id == null) {
+                Database.select(TABLE)
+            } else {
+                Database.select(TABLE, id)
+            }
             while (resultSet.next()) {
                 val person = Person()
                 person.id = resultSet.getInt(PK_FIELD)
@@ -88,6 +96,9 @@ class PersonDao {
         private const val PK_FIELD = "id"
         private val FIELDS = listOf("name", "birthDate", "sex")
         private val TABLE = Person::class.simpleName!!.toLowerCase()
+        private const val URL = "jdbc:mysql://localhost:3306/personsDB"
+        private const val USER = "root"
+        private const val PASS = ""
     }
 
 }

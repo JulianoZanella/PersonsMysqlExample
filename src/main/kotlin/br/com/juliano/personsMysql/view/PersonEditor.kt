@@ -6,7 +6,7 @@ import tornadofx.*
 
 class PersonEditor : View() {
 
-    val controller: PersonController by inject()
+    private val controller: PersonController by inject()
     private val toggleGroup = ToggleGroup()
 
     override val root = form {
