@@ -11,10 +11,6 @@ import java.sql.SQLException
 
 class PersonDao {
 
-    init {
-        Database.createConnection(URL, USER, PASS)
-    }
-
     fun insert(person: Person) {
         try {
             Database.insert(TABLE,
@@ -91,14 +87,9 @@ class PersonDao {
         return list
     }
 
-
     companion object {
         private const val PK_FIELD = "id"
         private val FIELDS = listOf("name", "birthDate", "sex")
         private val TABLE = Person::class.simpleName!!.toLowerCase()
-        private const val URL = "jdbc:mysql://localhost:3306/personsDB"
-        private const val USER = "root"
-        private const val PASS = ""
     }
-
 }
