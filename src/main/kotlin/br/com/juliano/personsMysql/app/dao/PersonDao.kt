@@ -2,8 +2,8 @@ package br.com.juliano.personsMysql.app.dao
 
 import br.com.juliano.personsMysql.app.model.Person
 import br.com.juliano.personsMysql.app.util.*
-import br.com.juliano.personsMysql.app.util.exceptiom.InvalidTypeException
 import br.com.julianozanella.util.Database
+import br.com.julianozanella.util.exception.InvalidTypeArgsException
 import java.lang.reflect.InvocationTargetException
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -17,7 +17,7 @@ class PersonDao {
                     hashMapOf(Pair(FIELDS[0], person.name), Pair(FIELDS[1], person.birthDate), Pair(FIELDS[2], person.sex)))
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
-        } catch (ex: InvalidTypeException) {
+        } catch (ex: InvalidTypeArgsException) {
             showMessage(ex.message!!)
         }
     }
@@ -30,7 +30,7 @@ class PersonDao {
                     person.id)
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
-        } catch (ex: InvalidTypeException) {
+        } catch (ex: InvalidTypeArgsException) {
             showMessage(ex.message!!)
         }
     }
@@ -40,7 +40,7 @@ class PersonDao {
             Database.delete(TABLE, person.id)
         } catch (ex: SQLException) {
             showMessage(ex.message!!)
-        } catch (ex: InvalidTypeException) {
+        } catch (ex: InvalidTypeArgsException) {
             showMessage(ex.message!!)
         }
     }
